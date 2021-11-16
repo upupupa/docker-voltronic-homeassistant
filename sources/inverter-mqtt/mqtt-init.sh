@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Simple script to register the MQTT topics when the container starts for the first time...
 
