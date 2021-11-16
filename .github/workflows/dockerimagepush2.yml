@@ -50,7 +50,7 @@ jobs:
             --build-arg "VERSION=${{ steps.prepare.outputs.version }}" \
             --tag "${{ steps.prepare.outputs.docker_image }}:latest" \
             --tag "${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}" \
-            --file Dockerfile
+            --file Dockerfile.multiarch
       -
         name: Clear
         if: always()
