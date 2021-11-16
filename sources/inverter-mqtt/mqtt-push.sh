@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 MQTT_SERVER=`cat /etc/inverter/mqtt.json | jq '.server' -r`
 MQTT_PORT=`cat /etc/inverter/mqtt.json | jq '.port' -r`

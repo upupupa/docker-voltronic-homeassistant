@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 RUN apk update && apk upgrade
-RUN apk add curl git g++ make cmake jq mosquitto-clients bash coreutils
+RUN apk add curl git g++ make cmake jq mosquitto-clients coreutils
 
 ADD sources/ /opt/
 ADD config/ /etc/inverter/
@@ -18,4 +18,4 @@ HEALTHCHECK \
   CMD /opt/healthcheck
 
 WORKDIR /opt
-ENTRYPOINT ["/bin/bash", "/opt/inverter-mqtt/entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "/opt/inverter-mqtt/entrypoint.sh"]
