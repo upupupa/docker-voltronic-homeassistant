@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 RUN apk update && apk upgrade
-RUN apk add curl git g++ make cmake jq mosquitto-clients coreutils
+RUN apk add curl git g++ make cmake jq mosquitto-clients coreutils bash
 
 ADD sources/ /opt/
 ADD config/ /etc/inverter/
