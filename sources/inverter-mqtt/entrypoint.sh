@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 UNBUFFER='stdbuf -i0 -oL -eL'
 
