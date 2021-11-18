@@ -20,7 +20,7 @@ services:
 
     volumes:
         - ./config/:/etc/inverter/
-        - ./sources/:/opt/
+          #        - ./sources/:/opt/
 
     devices:
     #  - "/dev/mem:/dev/mem"
