@@ -5,12 +5,12 @@ services:
 
     # We're now (finally) supporting Multi-Arch builds (via Github actions) on Docker Hub!
     # Uncomment for nedkelly's dockerhub image We're now (finally) supporting Multi-Arch builds (via Github actions) on Docker Hub!
-    image: bushrangers/ha-voltronic-mqtt
+    # image: upupa/ha-voltronic-mqtt:f4772d56
 
     # Uncomment if you want to build your own local version.
-    # build:
-    #  context: .
-    #  dockerfile: Dockerfile
+    build:
+     context: .
+     dockerfile: Dockerfile
 
 
     container_name: inverter-testing
@@ -20,6 +20,7 @@ services:
 
     volumes:
         - ./config/:/etc/inverter/
+        - ./sources/:/opt/
 
     devices:
     #  - "/dev/mem:/dev/mem"
