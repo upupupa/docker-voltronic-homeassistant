@@ -7,14 +7,11 @@ class Device:
             model: str) -> None:
 
         self.name = name
-        self.manufacturer = manufacturer
-        self.firmware_version = firmware_version
-        self.serial_number = serial_number
-        self.model = model
-    
-    def get_all_data(self) -> tuple[str, ...]:
-        return self.name, self.manufacturer, self.firmware_version,\
-                self.serial_number, self.model
+        self.mf = manufacturer
+        self.sw = firmware_version
+        self.ids = serial_number
+        self.mdl = model
+
 
 class Battery:
     def __init__(
@@ -23,66 +20,49 @@ class Battery:
             redischarge_voltage: float, under_voltage: float, voltage: float,
             max_charge_current: int, max_grid_charge_current: int) -> None:
 
-        self.capacity = capacity
-        self.voltage = voltage
-        self.charge_current = charge_current
-        self.discharge_current = discharge_current
-        self.recharge_voltage = recharge_voltage
-        self.under_voltage = under_voltage
-        self.bulk_voltage = bulk_voltage
-        self.float_voltage = float_voltage 
-        self.redischarge_voltage = redischarge_voltage
-        self.max_charge_current = max_charge_current
-        self.max_grid_charge_current = max_grid_charge_current
+        self.capacity = (capacity, '%', 'battery-outline')
+        self.voltage = (voltage, 'V', 'battery-outline')
+        self.charge_current = (charge_current, 'A', 'current-dc')
+        self.discharge_current = (discharge_current, 'A', 'current-dc')
+        self.recharge_voltage = (recharge_voltage, 'V', 'current-dc')
+        self.under_voltage = (under_voltage, 'V', 'current-dc')
+        self.bulk_voltage = (bulk_voltage, 'V', 'current-dc')
+        self.float_voltage = (float_voltage, 'V', 'current-dc') 
+        self.redischarge_voltage = (redischarge_voltage, 'V', 'battery-negative')
+        self.max_charge_current = (max_charge_current, 'A', 'current-dc')
+        self.max_grid_charge_current = (max_grid_charge_current, 'A', 'current-dc')
     
-    def get_all_data(self) -> tuple[int, float, int, int, float, float, float, float, float, int, int]:
-        return self.capacity, self.voltage, self.charge_current,\
-                self.discharge_current, self.recharge_voltage, self.under_voltage,\
-                self.bulk_voltage, self.float_voltage, self.redischarge_voltage,\
-                self.max_charge_current, self.max_grid_charge_current
-
 class AC:
     def __init__(
             self, charge_on: bool , grid_frequency: float, grid_voltage: float,
             out_frequency: float, out_voltage: float) -> None:
         
-        self.charge_on = charge_on
-        self.grid_frequency = grid_frequency
-        self.grid_voltage = grid_voltage
-        self.out_frequency = out_frequency
-        self.out_voltage = out_voltage
-
-    def get_all_data(self) -> tuple[bool, float, float, float, float]:
-        return self.charge_on, self.grid_frequency, self.grid_voltage,\
-                self.out_frequency, self.out_voltage
+        self.charge_on = (charge_on, '', 'power')
+        self.grid_frequency = (grid_frequency, 'Hz', 'current-ac')
+        self.grid_voltage = (grid_voltage, 'V', 'power-plug')
+        self.out_frequency = (out_frequency, 'Hz', 'current-ac')
+        self.out_voltage = (out_voltage, 'V', 'power-plug')
 
 class PV:
     def __init__(
             self, current: float, voltage: float,          
             watthour: float, watt: float) -> None:
 
-        self.current = current
-        self.voltage = voltage
-        self.watthour = watthour
-        self.watt = watt
-
-    def get_all_data(self) -> tuple[float, ...]:
-        return self.current, self.voltage, self.watthour, self.watt
+        self.current = (current, 'A', 'solar-panel-large')
+        self.voltage = (voltage, 'V', 'solar-panel-large')
+        self.watthour = (watthour, 'Wh', 'solar-panel-large')
+        self.watt = (watt, 'W', 'solar-panel-large')
 
 class Inverter:
     def __init__(
             self, heatsink_temperature: int, bus_voltage: float,
             load_percent: int, out_source_priority: int, 
             charge_priority: int, mode: int) -> None:
-
+        # TODO
         self.heatsink_temperature = heatsink_temperature
         self.bus_voltage = bus_voltage
         self.load_percent = load_percent
         self.out_source_priority = out_source_priority
         self.charge_priority = charge_priority
         self.mode = mode
-
-    def get_all_data(self) -> tuple[int, float, int, int, int, int]:
-        return self.heatsink_temperature, self.bus_voltage, self.load_percent,\
-                self.out_source_priority, self.charge_priority, self.mode
 

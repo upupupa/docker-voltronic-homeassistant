@@ -26,20 +26,14 @@ class MqttClient(Client):
 
     
     def _generate_simple_publish(
-            self, name, unit_of_measurement, icon, device: Device 
+            self, device: Device, name, unit_of_measurement, icon
             ):
-        topic = f'{self.topic}/sensor/{device.name}_{device.serial_number}/{name}/config'
+        topic = f'{self.topic}/sensor/{device.name}_{device.sw}/{name}/config'
         message = {
                 'name': f'{name}_{device.name}',
-                'uniq_id': f'{device.serial_number}_{name}',
-                'device': {
-                    'ids': device.serial_number,
-                    'mf': device.manufacturer,
-                    'mdl': device.model,
-                    'name': device.name,
-                    'sw': device.firmware_version
-                    },
-                'state_topic': f'{self.topic}/sensor/{device.name}_{device.serial_number}/{name}',
+                'uniq_id': f'{device.sw}_{name}',
+                'device': device.__dict__,
+                'state_topic': f'{self.topic}/sensor/{device.name}_{device.sw}/{name}',
                 'state_class': 'measurement',
                 'unit_of_meas': unit_of_measurement,
                 'icon': icon
@@ -48,23 +42,17 @@ class MqttClient(Client):
         return topic, message
 
     def _generate_energy_publish(
-            self, name, unit_of_measurement, icon, device: Device, device_class
+            self, device: Device, name, unit_of_measurement, icon, device_class 
             ):
-        topic_lr = f'{self.topic}/sensor/{device.name}_{device.serial_number}/{name}/LastReset'
+        topic_lr = f'{self.topic}/sensor/{device.name}_{device.sw}/{name}/LastReset'
         message_lr = '1970-01-01T00:00:00+00:00'
 
-        topic = f'{self.topic}/sensor/{device.name}_{device.serial_number}/{name}/config'
+        topic = f'{self.topic}/sensor/{device.name}_{device.sw}/{name}/config'
         message = {
                 'name': f'{name}_{device.name}',
-                'uniq_id': f'{device.serial_number}_{name}',
-                'device': {
-                    'ids': device.serial_number,
-                    'mf': device.manufacturer,
-                    'mdl': device.model,
-                    'name': device.name,
-                    'sw': device.firmware_version
-                    },
-                'state_topic': f'{self.topic}/sensor/{device.name}_{device.serial_number}/{name}',
+                'uniq_id': f'{device.sw}_{name}',
+                'device': device.__dict__,
+                'state_topic': f'{self.topic}/sensor/{device.name}_{device.sw}/{name}',
                 'state_class': 'total_increasing',
                 'device_class': device_class,
                 'unit_of_meas': unit_of_measurement,
@@ -73,20 +61,13 @@ class MqttClient(Client):
         return (topic_lr, message_lr), (topic, message)
 
     def _generate_mode_publish(
-            self, name, icon, device: Device
-            ):
-        topic = f'{self.topic}/sensor/{device.name}_{device.serial_number}/{name}/config'
+            self, device: Device, name, icon):
+        topic = f'{self.topic}/sensor/{device.name}_{device.sw}/{name}/config'
         message = {
                 'name': f'{name}_{device.name}',
-                'uniq_id': f'{device.serial_number}_{name}',
-                'device': {
-                    'ids': device.serial_number,
-                    'mf': device.manufacturer,
-                    'mdl': device.model,
-                    'name': device.name,
-                    'sw': device.firmware_version
-                    },
-                'state_topic': f'{self.topic}/sensor/{device.name}_{device.serial_number}/{name}',
+                'uniq_id': f'{device.sw}_{name}',
+                'device': device.__dict__,
+                'state_topic': f'{self.topic}/sensor/{device.name}_{device.sw}/{name}',
                 'icon': icon
                 }
 
@@ -147,7 +128,7 @@ class MqttClient(Client):
         self.loop_forever()
 
     def publish_battery(self, battery: Battery, device: Device):
-        message_topic = f'{self.topic}/sensor/{device.name}_{device.serial_number}/'
+        message_topic = f'{self.topic}/sensor/{device.name}_{device.sw}/'
         messages = []
         
         for battery_attr
