@@ -18,8 +18,12 @@ class MqttClient(Client):
         self.topic = topic
         self.protocol = protocol
     
-    def init_mqtt_topics(self):
-        pass
+    def init_mqtt_topics(
+            self, battery: Battery, 
+            ac: AC, pv: PV, inverter: Inverter, 
+            device: Device):
+        topics = []
+
     
     def _generate_simple_publish(
             self, name, unit_of_measurement, icon, device: Device 

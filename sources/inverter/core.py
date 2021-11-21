@@ -12,8 +12,8 @@ class Device:
         self.serial_number = serial_number
         self.model = model
     
-    def get_all_data(self) -> tuple[str]:
-        reutrn self.name, self.manufacturer, self.firmware_version,\
+    def get_all_data(self) -> tuple[str, ...]:
+        return self.name, self.manufacturer, self.firmware_version,\
                 self.serial_number, self.model
 
 class Battery:
@@ -35,6 +35,11 @@ class Battery:
         self.max_charge_current = max_charge_current
         self.max_grid_charge_current = max_grid_charge_current
     
+    def get_all_data(self) -> tuple[int, float, int, int, float, float, float, float, float, int, int]:
+        return self.capacity, self.voltage, self.charge_current,\
+                self.discharge_current, self.recharge_voltage, self.under_voltage,\
+                self.bulk_voltage, self.float_voltage, self.redischarge_voltage,\
+                self.max_charge_current, self.max_grid_charge_current
 
 class AC:
     def __init__(
@@ -47,6 +52,9 @@ class AC:
         self.out_frequency = out_frequency
         self.out_voltage = out_voltage
 
+    def get_all_data(self) -> tuple[bool, float, float, float, float]:
+        return self.charge_on, self.grid_frequency, self.grid_voltage,\
+                self.out_frequency, self.out_voltage
 
 class PV:
     def __init__(
@@ -58,6 +66,8 @@ class PV:
         self.watthour = watthour
         self.watt = watt
 
+    def get_all_data(self) -> tuple[float, ...]:
+        return self.current, self.voltage, self.watthour, self.watt
 
 class Inverter:
     def __init__(
@@ -71,4 +81,8 @@ class Inverter:
         self.out_source_priority = out_source_priority
         self.charge_priority = charge_priority
         self.mode = mode
+
+    def get_all_data(self) -> tuple[int, float, int, int, int, int]:
+        return self.heatsink_temperature, self.bus_voltage, self.load_percent,\
+                self.out_source_priority, self.charge_priority, self.mode
 
