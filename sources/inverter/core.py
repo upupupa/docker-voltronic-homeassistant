@@ -8,8 +8,8 @@ class Device:
 
         self.name = name
         self.mf = manufacturer
-        self.sw = firmware_version
-        self.ids = serial_number
+        self.sw = serial_number
+        self.ids = firmware_version
         self.mdl = model
 
 
@@ -32,6 +32,7 @@ class Battery:
         self.max_charge_current = (max_charge_current, 'A', 'current-dc')
         self.max_grid_charge_current = (max_grid_charge_current, 'A', 'current-dc')
     
+
 class AC:
     def __init__(
             self, charge_on: bool , grid_frequency: float, grid_voltage: float,
@@ -43,6 +44,7 @@ class AC:
         self.out_frequency = (out_frequency, 'Hz', 'current-ac')
         self.out_voltage = (out_voltage, 'V', 'power-plug')
 
+
 class PV:
     def __init__(
             self, current: float, voltage: float,          
@@ -50,19 +52,25 @@ class PV:
 
         self.current = (current, 'A', 'solar-panel-large')
         self.voltage = (voltage, 'V', 'solar-panel-large')
-        self.watthour = (watthour, 'Wh', 'solar-panel-large')
+        self.watthour = (watthour, 'Wh', 'solar-panel-large', 'energy')
         self.watt = (watt, 'W', 'solar-panel-large')
+
 
 class Inverter:
     def __init__(
             self, heatsink_temperature: int, bus_voltage: float,
-            load_percent: int, out_source_priority: int, 
+            load_percent: int, load_status_on: int, load_va: int, load_watt: int,
+            load_watthour: float, out_source_priority: int, 
             charge_priority: int, mode: int) -> None:
-        # TODO
-        self.heatsink_temperature = heatsink_temperature
-        self.bus_voltage = bus_voltage
-        self.load_percent = load_percent
-        self.out_source_priority = out_source_priority
-        self.charge_priority = charge_priority
-        self.mode = mode
+
+        self.heatsink_temperature = (heatsink_temperature, '°C', 'details')
+        self.bus_voltage = (bus_voltage, 'V', 'details')
+        self.load_percent = (load_percent, '%', 'brightness-percent')
+        self.load_status_on = (load_status_on, '', 'power')
+        self.load_va = (load_va, 'VA', 'chart-bell-curve')
+        self.load_watt = (load_watt, 'W', 'chart-bell-curve')
+        self.load_watthour = (load_watthour, 'Wh', 'chart-bell-curve', 'energy')
+        self.out_source_priority = (out_source_priority, '', 'grid')
+        self.charger_source_priority = (charge_priority, '', 'solar-power') 
+        self.inverter_mode = (mode, 'solar-power')
 

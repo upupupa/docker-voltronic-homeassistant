@@ -1,5 +1,4 @@
 from paho.mqtt.client import Client
-# from paho.mqtt import publish, subscribe, MQTTv5 
 from inverter.core import Battery, AC, PV, Inverter, Device 
 
 
@@ -22,9 +21,53 @@ class MqttClient(Client):
             self, battery: Battery, 
             ac: AC, pv: PV, inverter: Inverter, 
             device: Device):
-        topics = []
+        init_data = []
 
-    
+        init_data.append(self._init_object(device=device, related_object=battery))
+        init_data.append(self._init_object(device=device, related_object=inverter))
+        init_data.append(self._init_object(device=device, related_object=pv))
+        init_data.append(self._init_object(device=device, related_object=ac))
+        # push data
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(init_data)
+
+    def _init_object(self, device: Device, related_object: Battery|Inverter|PV|AC) -> list[tuple[str, dict]]:
+        object_data = []
+        # iterate by params of object to initialize topics
+        for b_key in related_object.__dict__:
+            match len(related_object.__dict__[b_key]):
+                case 2:
+                    _, icon = related_object.__dict__[b_key]
+                    topic, message = self._generate_mode_publish(
+                        device=device,
+                        name=b_key,
+                        icon=icon
+                    )
+                case 3:
+                    _, unit_of_meas, icon = related_object.__dict__[b_key]
+                    topic, message = self._generate_simple_publish(
+                        device=device,
+                        name=b_key, 
+                        unit_of_measurement=unit_of_meas,
+                        icon=icon)
+                case 4:
+                    _, unit_of_meas, icon, device_class = related_object.__dict__[b_key]
+                    topic, message = self._generate_energy_publish(
+                        device=device,
+                        name=b_key,
+                        unit_of_measurement=unit_of_meas,
+                        icon=icon,
+                        device_class=device_class)
+                case _:
+                    raise AttributeError
+            object_data.append((topic, message))
+        
+        return object_data
+
+    def push_mqtt_data(self, device: Device, topic: str, value: dict):
+        pass
+
     def _generate_simple_publish(
             self, device: Device, name, unit_of_measurement, icon
             ):
@@ -127,19 +170,16 @@ class MqttClient(Client):
 
         self.loop_forever()
 
-    def publish_battery(self, battery: Battery, device: Device):
+    def publish_battery(self, battery: Battery, device: Device, register=False):
         message_topic = f'{self.topic}/sensor/{device.name}_{device.sw}/'
         messages = []
-        
-        for battery_attr
-
         pass
 
-    def publish_ac(self, ac: AC):
+    def publish_ac(self, ac: AC, register=False):
         pass
 
-    def publish_pv(self, pv: PV):
+    def publish_pv(self, pv: PV, register=False):
         pass
     
-    def publish_inverter(self, inverter: Inverter):
+    def publish_inverter(self, inverter: Inverter, register=False):
         pass
