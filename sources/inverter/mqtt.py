@@ -31,6 +31,7 @@ class MqttClient(Client):
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(init_data)
+        self.push_mqtt_data()
 
     def _init_object(self, device: Device, related_object: Battery|Inverter|PV|AC) -> list[tuple[str, dict]]:
         object_data = []
@@ -65,8 +66,19 @@ class MqttClient(Client):
         
         return object_data
 
-    def push_mqtt_data(self, device: Device, topic: str, value: dict):
-        pass
+    def push_mqtt_data(self, payload, qos, retain):
+        ''' msgs: {"topic": "<topic>", "payload":"<payload>", "qos":"<qos>", "retain":"<retain>"} '''
+        
+        result = self.publish.multiple(
+                msgs, 
+                hostname=self.host,
+                port=self.port,
+                client_id=self.client_id,
+                keepalive=30,
+                protocol=self.protocol,
+                auth=self.auth) # TODO TAKE FROM ENV
+        if result != 0:
+            raise Exception # TODO create new exception
 
     def _generate_simple_publish(
             self, device: Device, name, unit_of_measurement, icon
@@ -130,6 +142,7 @@ class MqttClient(Client):
             match rc:
                 case 0:
                     print('Connection successfull!')
+                    self._init_object()
                 case 1:
                     print('Wrong protocol...')
                     raise TypeError
