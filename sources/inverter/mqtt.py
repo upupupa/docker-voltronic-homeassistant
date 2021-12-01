@@ -9,7 +9,7 @@ class MqttClient(Client):
         super().__init__()
         self.host = host
         self.port = port
-        self.auth = {'username': username, 'password': password}
+        self.__auth = {'username': username, 'password': password}
 
         self.client_id = client_id
         self.clean_session = clean_session
@@ -18,70 +18,52 @@ class MqttClient(Client):
         self.protocol = protocol
     
     def init_mqtt_topics(
-            self, battery: Battery, 
-            ac: AC, pv: PV, inverter: Inverter, 
-            device: Device):
+            self,  
+            device: Device,
+            *components: Inverter|Battery|AC|PV):
         init_data = []
 
-        init_data.append(self._init_object(device=device, related_object=battery))
-        init_data.append(self._init_object(device=device, related_object=inverter))
-        init_data.append(self._init_object(device=device, related_object=pv))
-        init_data.append(self._init_object(device=device, related_object=ac))
-        # push data
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(init_data)
-        self.push_mqtt_data()
+        for component in components:
+            init_data += self._init_object(device, component)
+
+        self.push_multiple_mqtt_data(msgs=init_data)
 
     def _init_object(self, device: Device, related_object: Battery|Inverter|PV|AC) -> list[tuple[str, dict]]:
-        object_data = []
-        # iterate by params of object to initialize topics
+        object_messages = []
+        # iterate by params of object to get publish messages
         for b_key in related_object.__dict__:
             match len(related_object.__dict__[b_key]):
                 case 2:
                     _, icon = related_object.__dict__[b_key]
-                    topic, message = self._generate_mode_publish(
+                    object_msg = self._generate_mode_publish(
                         device=device,
                         name=b_key,
                         icon=icon
                     )
                 case 3:
                     _, unit_of_meas, icon = related_object.__dict__[b_key]
-                    topic, message = self._generate_simple_publish(
+                    object_msg = self._generate_simple_publish(
                         device=device,
                         name=b_key, 
                         unit_of_measurement=unit_of_meas,
                         icon=icon)
                 case 4:
                     _, unit_of_meas, icon, device_class = related_object.__dict__[b_key]
-                    topic, message = self._generate_energy_publish(
+                    object_msg_last_reset, object_msg = self._generate_energy_publish(
                         device=device,
                         name=b_key,
                         unit_of_measurement=unit_of_meas,
                         icon=icon,
                         device_class=device_class)
+                    object_messages.append(object_msg_last_reset)
                 case _:
                     raise AttributeError
-            object_data.append((topic, message))
+            object_messages.append(object_msg)
         
-        return object_data
-
-    def push_mqtt_data(self, payload, qos, retain):
-        ''' msgs: {"topic": "<topic>", "payload":"<payload>", "qos":"<qos>", "retain":"<retain>"} '''
-        
-        result = self.publish.multiple(
-                msgs, 
-                hostname=self.host,
-                port=self.port,
-                client_id=self.client_id,
-                keepalive=30,
-                protocol=self.protocol,
-                auth=self.auth) # TODO TAKE FROM ENV
-        if result != 0:
-            raise Exception # TODO create new exception
+        return object_messages
 
     def _generate_simple_publish(
-            self, device: Device, name, unit_of_measurement, icon
+            self, device: Device, name, unit_of_measurement, icon, qos=0, retain=False
             ):
         topic = f'{self.topic}/sensor/{device.name}_{device.sw}/{name}/config'
         message = {
@@ -94,13 +76,13 @@ class MqttClient(Client):
                 'icon': icon
                 }
 
-        return topic, message
+        return {'topic': topic, 'message': str(message), 'qos': qos, 'retain':retain}
 
     def _generate_energy_publish(
-            self, device: Device, name, unit_of_measurement, icon, device_class 
+            self, device: Device, name, unit_of_measurement, icon, device_class, qos=0, retain=False 
             ):
-        topic_lr = f'{self.topic}/sensor/{device.name}_{device.sw}/{name}/LastReset'
-        message_lr = '1970-01-01T00:00:00+00:00'
+        topic_last_reset = f'{self.topic}/sensor/{device.name}_{device.sw}/{name}/LastReset'
+        message_last_reset = '1970-01-01T00:00:00+00:00'
 
         topic = f'{self.topic}/sensor/{device.name}_{device.sw}/{name}/config'
         message = {
@@ -113,10 +95,12 @@ class MqttClient(Client):
                 'unit_of_meas': unit_of_measurement,
                 'icon': icon
                 }
-        return (topic_lr, message_lr), (topic, message)
+        return {'topic': topic_last_reset, 'message': message_last_reset, 'qos': qos, 'retain':retain}, \
+               {'topic': topic, 'message': str(message), 'qos': qos, 'retain':retain}
 
     def _generate_mode_publish(
-            self, device: Device, name, icon):
+            self, device: Device, name, icon, qos=0, retain=False
+            ):
         topic = f'{self.topic}/sensor/{device.name}_{device.sw}/{name}/config'
         message = {
                 'name': f'{name}_{device.name}',
@@ -126,14 +110,44 @@ class MqttClient(Client):
                 'icon': icon
                 }
 
-        return topic, message
+        return {'topic': topic, 'message': str(message), 'qos': qos, 'retain':retain}
+
+    def generate_message(self, device: Device, sensor_name, sensor_value, qos=0, retain=False):
+        topic = f'{self.topic}/sensor/{device.name}_{device.sw}/{sensor_name}/'
+        return {'topic': topic, 'payload': str(sensor_value), 'qos': qos, 'retain': retain}
+
+    def push_multiple_mqtt_data(self, msgs):
+        ''' msgs: [{"topic": "<topic>", "payload":"<payload>", "qos":"<qos>", "retain":"<retain>"}, ...] '''
+        
+        result = self.publish.multiple(
+                msgs, 
+                hostname=self.host,
+                port=self.port,
+                client_id=self.client_id,
+                keepalive=30,
+                protocol=self.protocol,
+                auth=self.__auth) 
+
+        if result != 0:
+            raise Exception # TODO create new exception
+
+        return result
+
+    def push_single_mqtt_data(self, topic, payload, qos=0, retain=False):
+        result = self.publish.single(
+                topic,
+                payload,
+                qos=qos,
+                retain=retain
+                )
+        return result
 
     def subscribe_to_homeassistant(self, device: Device):
     # Make QOS = 2. It allows us to deliver messages with guarantee.
     # By the way, QOS 2 is a very slow solution. It requires to publish 4
     # messages, but as a result we guarantee message delivery without 
     # duplicates
-        topic = f'{self.topic}/sensors/{device.name}/'
+        topic = f'{self.topic}/sensor/{device.name}/'
         
         def on_message(client, userdata, message):
             print(message.topic, message.payload)
@@ -142,7 +156,7 @@ class MqttClient(Client):
             match rc:
                 case 0:
                     print('Connection successfull!')
-                    self._init_object()
+                    return client, userdata, flags, rc
                 case 1:
                     print('Wrong protocol...')
                     raise TypeError
@@ -167,7 +181,7 @@ class MqttClient(Client):
         self.on_subscribe = on_subscribe
         self.on_message = on_message
 
-        self.username_pw_set(**self.auth)
+        self.username_pw_set(**self.__auth)
         self.connect(
                 host=self.host,
                 port=self.port,
