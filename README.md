@@ -43,7 +43,7 @@ It's pretty straightforward, just clone down the sources and set the configurati
 
 ```bash
 # Clone down sources on the host you want to monitor...
-git clone https://github.com/gadget78/docker-voltronic-homeassistant.git /opt/ha-inverter-mqtt-agent
+git clone https://github.com/upupupa/docker-voltronic-homeassistant.git /opt/ha-inverter-mqtt-agent
 
 # Change directory to the downloaded source
 cd /opt/ha-inverter-mqtt-agent
